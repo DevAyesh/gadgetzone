@@ -33,8 +33,8 @@ export default async function AdminDashboardPage() {
     .reduce((sum, order) => sum + (order.total_amount || 0), 0);
 
   // Formatting helpers
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
+  function formatPriceAdmin(price: number) {
+    return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(price).replace('LKR', 'Rs. ');
   };
 
   const formatDateWithTime = (dateString: string) => {
@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPrice(totalRevenue)}</div>
+            <div className="text-2xl font-bold">{formatPriceAdmin(totalRevenue / 100)}</div>
             <p className="text-xs text-muted-foreground">All time revenue</p>
           </CardContent>
         </Card>
@@ -143,7 +143,7 @@ export default async function AdminDashboardPage() {
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <div className="font-medium">{formatPrice(order.total_amount)}</div>
+                        <div className="font-medium">{formatPriceAdmin(order.total_amount / 100)}</div>
                         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 border-transparent ${getStatusColor(order.status)}`}>
                           {order.status.toUpperCase()}
                         </Badge>

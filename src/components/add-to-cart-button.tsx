@@ -17,13 +17,15 @@ interface AddToCartButtonProps {
   className?: string;
   variant?: "default" | "outline" | "secondary" | "ghost" | "link";
   showIcon?: boolean;
+  iconOnly?: boolean;
 }
 
-export function AddToCartButton({ product, className, variant = "default", showIcon = true }: AddToCartButtonProps) {
+export function AddToCartButton({ product, className, variant = "default", showIcon = true, iconOnly = false }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating if wrapped in a link area
+    e.stopPropagation(); // Prevent bubbling up to parent clickable areas
     
     addItem({
       id: product.id,
@@ -33,26 +35,23 @@ export function AddToCartButton({ product, className, variant = "default", showI
       image_url: product.image_url,
     });
     
+    // Automatically open the cart sheet
+    document.dispatchEvent(new CustomEvent('open-cart'));
+    
     toast.success("Added to cart", {
-      description: `${product.name} was added to your shopping cart.`,
-      action: {
-        label: "View Cart",
-        onClick: () => {
-          // You could trigger a global event here to open the sheet if you wanted
-          document.dispatchEvent(new CustomEvent('open-cart'));
-        }
-      }
+      description: `${product.name} was added to your shopping cart.`
     });
   };
 
   return (
     <Button 
       variant={variant} 
-      className={cn("w-full transition-all duration-300 active:scale-95", className)} 
+      className={cn("transition-all duration-300 active:scale-95", className)} 
       onClick={handleAddToCart}
+      size={iconOnly ? "icon" : "default"}
     >
-      {showIcon && <ShoppingCart className="w-4 h-4 mr-2" />}
-      Add to Cart
+      {showIcon && <ShoppingCart className={cn(iconOnly ? "w-5 h-5" : "w-4 h-4 mr-2")} />}
+      {!iconOnly && "Add to Cart"}
     </Button>
   );
 }

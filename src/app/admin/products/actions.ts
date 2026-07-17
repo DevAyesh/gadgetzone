@@ -18,6 +18,7 @@ export async function addProduct(formData: FormData) {
   const badge = formData.get("badge") as string;
   const description = formData.get("description") as string;
   const image_url = formData.get("image_url") as string;
+  const is_popular = formData.get("is_popular") === "on";
 
   const { data: insertedProduct, error } = await supabase.from("products").insert({
     name,
@@ -30,6 +31,7 @@ export async function addProduct(formData: FormData) {
     badge: badge === "NONE" ? "" : badge,
     description,
     is_active: true,
+    is_popular,
   }).select("id").single();
 
   if (error) {
@@ -48,6 +50,7 @@ export async function addProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath("/shop");
+  revalidatePath("/"); // Update homepage New Arrivals / Popular
   redirect("/admin/products");
 }
 
@@ -63,6 +66,7 @@ export async function deleteProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath("/shop");
+  revalidatePath("/"); // Update homepage
 }
 
 export async function updateProduct(formData: FormData) {
@@ -78,6 +82,7 @@ export async function updateProduct(formData: FormData) {
   const badge = formData.get("badge") as string;
   const description = formData.get("description") as string;
   const image_url = formData.get("image_url") as string;
+  const is_popular = formData.get("is_popular") === "on";
 
   const { error } = await supabase.from("products").update({
     name,
@@ -88,6 +93,7 @@ export async function updateProduct(formData: FormData) {
     stock,
     badge: badge === "NONE" ? "" : badge,
     description,
+    is_popular,
   }).eq("id", id);
 
   if (error) {
@@ -107,5 +113,6 @@ export async function updateProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath(`/shop/${slug}`);
+  revalidatePath("/"); // Update homepage
   redirect("/admin/products");
 }

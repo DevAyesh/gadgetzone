@@ -11,7 +11,7 @@ const SLIDES = [
     title: "Listen Beyond",
     titleBold: "Just Sound.",
     desc: "Experience music like never before with industry-leading noise cancellation and premium comfort.",
-    price: "$398.00",
+    offer: "Save up to 40%",
     badge: "NEW ARRIVAL",
     img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=1200&q=80",
     link: "/shop"
@@ -20,7 +20,7 @@ const SLIDES = [
     title: "Vibrant Beats",
     titleBold: "For Everyone.",
     desc: "Bring color to your everyday listening. Feel the bass and make a statement.",
-    price: "$249.99",
+    offer: "Extra 20% Off at Checkout",
     badge: "BEST SELLER",
     img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&q=80",
     link: "/shop"
@@ -29,7 +29,7 @@ const SLIDES = [
     title: "True Wireless",
     titleBold: "True Freedom.",
     desc: "Seamless connectivity, crystal clear calls, and all-day comfort in a compact case.",
-    price: "$179.99",
+    offer: "Buy 1 Get 1 50% Off",
     badge: "TRENDING",
     img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&q=80",
     link: "/shop"
@@ -74,9 +74,11 @@ export function HeroSlider() {
                 {slide.desc}
               </p>
               
-              <div className="flex items-center gap-6 pt-2">
-                <span className="text-2xl md:text-3xl font-black">{slide.price}</span>
-                <Link href={slide.link} className={cn(buttonVariants({ size: "lg" }), "h-12 px-8 text-base bg-black hover:bg-gray-800 text-white rounded-full group")}>
+              <div className="flex items-center gap-4 pt-4">
+                <div className="inline-flex items-center justify-center bg-orange-50 text-orange-600 px-4 py-2.5 rounded-full border border-orange-200/50 shadow-sm">
+                  <span className="text-sm md:text-base font-bold tracking-tight">{slide.offer}</span>
+                </div>
+                <Link href={slide.link} className={cn(buttonVariants({ size: "lg" }), "h-12 px-8 text-base bg-black hover:bg-gray-800 text-white rounded-full group shadow-md transition-all hover:shadow-xl")}>
                   Shop Now
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>

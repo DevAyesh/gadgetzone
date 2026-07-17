@@ -16,7 +16,9 @@ const MOCK_PRODUCTS = [
   { id: "5", name: "Sony - WH-CH520 Wireless On-Ear Headset", price: 59.99, priceStr: "$59.99", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80", badge: "NEW", slug: "sony-wh-ch520", rating: 5 },
   { id: "6", name: "Skullcandy - Crusher ANC 2 Wireless", price: 199.99, priceStr: "$199.99", img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&q=80", badge: "NEW", slug: "skullcandy-crusher", rating: 5 },
   { id: "7", name: "Beats Studio Pro - Light", price: 349.99, priceStr: "$349.99", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80", badge: "NEW", slug: "beats-studio-pro-light", rating: 5 },
-  { id: "8", name: "Skullcandy - Rail True Wireless Earbuds", price: 79.99, priceStr: "$79.99", img: "https://images.unsplash.com/photo-1572569433602-6663dbb38a79?w=600&q=80", badge: "NEW", slug: "skullcandy-rail", rating: 5 }
+  { id: "8", name: "Skullcandy - Rail True Wireless Earbuds", price: 79.99, priceStr: "$79.99", img: "https://images.unsplash.com/photo-1572569433602-6663dbb38a79?w=600&q=80", badge: "NEW", slug: "skullcandy-rail", rating: 5 },
+  { id: "101", name: "Sony Pulse 3D Wireless Headset", price: 99.99, priceStr: "$99.99", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80", badge: "NEW", slug: "sony-pulse", rating: 5 },
+  { id: "102", name: "JBL Quantum 800 Gaming", price: 199.99, priceStr: "$199.99", img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&q=80", badge: "NEW", slug: "jbl-quantum", rating: 5 }
 ];
 
 const MOCK_POPULAR = [
@@ -27,62 +29,148 @@ const MOCK_POPULAR = [
   { id: "13", name: "Beats Flex Wireless", price: 69.99, priceStr: "$69.99", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80", badge: "", slug: "beats-flex", rating: 5 },
   { id: "14", name: "JBL Reflect Flow Pro", price: 179.95, priceStr: "$179.95", img: "https://images.unsplash.com/photo-1572569433602-6663dbb38a79?w=600&q=80", badge: "", slug: "jbl-reflect", rating: 5 },
   { id: "15", name: "Bose QuietComfort 45", price: 329.00, priceStr: "$329.00", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80", badge: "", slug: "bose-qc45", rating: 5 },
-  { id: "16", name: "JBL VIBE 100 TWS", price: 49.95, priceStr: "$49.95", img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&q=80", badge: "", slug: "jbl-vibe", rating: 5 }
+  { id: "16", name: "JBL VIBE 100 TWS", price: 49.95, priceStr: "$49.95", img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&q=80", badge: "", slug: "jbl-vibe", rating: 5 },
+  { id: "103", name: "Bose SoundLink Flex", price: 149.00, priceStr: "$149.00", img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80", badge: "", slug: "bose-soundlink", rating: 5 },
+  { id: "104", name: "Beats Powerbeats Pro", price: 249.99, priceStr: "$249.99", img: "https://images.unsplash.com/photo-1572569433602-6663dbb38a79?w=600&q=80", badge: "", slug: "beats-powerbeats", rating: 5 }
 ];
 
 function ProductCard({ product }: { product: any }) {
   return (
-    <Card className="group border-none shadow-none bg-transparent">
-      <div className="relative aspect-square overflow-hidden bg-[#F5F5F5] rounded-md mb-4 flex items-center justify-center">
+    <Card className="group bg-white border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-xl overflow-hidden max-w-[260px] mx-auto w-full flex flex-col h-full">
+      <Link href={`/shop/${product.slug}`} className="relative aspect-square overflow-hidden bg-gray-50/50 flex items-center justify-center p-0 block cursor-pointer">
         {product.badge && (
           <Badge className="absolute top-3 left-3 z-10 bg-black text-white hover:bg-black rounded-sm text-xs font-semibold px-2 py-0.5">
             {product.badge}
           </Badge>
         )}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-          <button className="bg-white rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black hover:text-white">
-            <Heart className="h-4 w-4" />
-          </button>
-          <button className="bg-white rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black hover:text-white">
-            <Eye className="h-4 w-4" />
-          </button>
-        </div>
         
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={product.img} 
           alt={product.name}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+          className="object-contain w-full h-full group-hover:scale-110 transition-transform duration-500"
         />
+      </Link>
+      
+      <CardContent className="p-4 flex flex-col flex-grow">
+        {/* Category breadcrumb style */}
+        <div className="mb-2">
+          <span className="text-[10px] text-gray-500 border border-gray-200 rounded-full px-2 py-0.5 bg-gray-50/50">
+            {product.categoryName || "Gadgets"}
+          </span>
+        </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        <Link href={`/shop/${product.slug}`}>
+          <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-3 mt-1 flex-grow leading-relaxed hover:text-blue-600 transition-colors">
+            {product.name}
+          </h3>
+        </Link>
+        
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <p className="font-bold text-base text-gray-900">
+            {product.priceStr || formatPrice(product.price)}
+          </p>
+          
           <AddToCartButton 
+            className="w-10 h-10 rounded-full bg-transparent hover:bg-gray-100 text-gray-500 hover:text-black border-0 shadow-none transition-colors"
+            variant="ghost"
+            showIcon={true}
+            iconOnly={true}
             product={{
               id: product.id,
               name: product.name,
-              price: product.price * 100, // convert to cents
+              price: product.price * 100, // convert to cents for AddToCartButton
               slug: product.slug,
               image_url: product.img
             }}
           />
         </div>
-      </div>
-      <CardContent className="p-0">
-        <div className="flex text-yellow-400 text-sm mb-2">
-          {Array(product.rating).fill(0).map((_, i) => (
-            <span key={i}>★</span>
-          ))}
-        </div>
-        <h3 className="font-semibold text-sm line-clamp-2 mb-1">{product.name}</h3>
-        <p className="font-bold text-sm">{product.priceStr}</p>
       </CardContent>
     </Card>
   );
 }
 
 import { HeroSlider } from "@/components/hero-slider";
+import { createClient } from "@/lib/supabase/server";
+import { formatPrice } from "@/lib/utils";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  
+  // Fetch real products marked as NEW
+  const { data: dbNewArrivals } = await supabase
+    .from("products")
+    .select(`*, images:product_images(image_url), category:categories(name)`)
+    .eq("badge", "NEW")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const mappedNewArrivals = dbNewArrivals ? dbNewArrivals.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price / 100, // convert back to normal for ProductCard logic
+    priceStr: formatPrice(p.price),
+    img: p.images?.[0]?.image_url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+    badge: p.badge,
+    slug: p.slug,
+    categoryName: p.category?.name,
+    rating: 5
+  })) : [];
+
+  // Combine real and mock products to ensure we have exactly 5 for one row
+  let displayNewArrivals: any[] = [...mappedNewArrivals];
+  if (displayNewArrivals.length < 5) {
+    const needed = 5 - displayNewArrivals.length;
+    displayNewArrivals = [...displayNewArrivals, ...MOCK_PRODUCTS.slice(0, needed)] as any[];
+  } else {
+    displayNewArrivals = displayNewArrivals.slice(0, 5);
+  }
+
+  // Fetch categories for "Shop by Categories" section
+  const { data: dbCategories } = await supabase.from("categories").select("*").order("name");
+  
+  const categoryImages: Record<string, string> = {
+    'smartphones': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&q=80',
+    'laptops': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&q=80',
+    'audio': 'https://dlifestylesg.com/cdn/shop/files/ULT_WEAR_Black_Standard-Large_1200x.jpg?v=1712806803',
+    'wearables': 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=300&q=80',
+    'cameras': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80',
+    'gaming': 'https://pisces.bbystatic.com/image2/BestBuy_US/dam/4672150-VG-cope-0389c629-d4c2-4afd-9ec0-46adadd4b8cf.jpg;maxHeight=455;maxWidth=815',
+    'gaming-consoles': 'https://pisces.bbystatic.com/image2/BestBuy_US/dam/4672150-VG-cope-0389c629-d4c2-4afd-9ec0-46adadd4b8cf.jpg;maxHeight=455;maxWidth=815',
+    'accessories': 'https://cdn.packhacker.com/2022/07/f1b89bdb-travel-tech-acc-featured.jpg'
+  };
+
+  // Fetch real products marked as POPULAR
+  const { data: dbPopularProducts } = await supabase
+    .from("products")
+    .select(`*, images:product_images(image_url), category:categories(name)`)
+    .eq("is_popular", true)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  const mappedPopularProducts = dbPopularProducts ? dbPopularProducts.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price / 100, // convert back to normal for ProductCard logic
+    priceStr: formatPrice(p.price),
+    img: p.images?.[0]?.image_url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+    badge: p.badge,
+    slug: p.slug,
+    categoryName: p.category?.name,
+    rating: 5
+  })) : [];
+
+  // Combine real and mock popular products to ensure we have exactly 10 for two rows
+  let displayPopularProducts: any[] = [...mappedPopularProducts];
+  if (displayPopularProducts.length < 10) {
+    const needed = 10 - displayPopularProducts.length;
+    displayPopularProducts = [...displayPopularProducts, ...MOCK_POPULAR.slice(0, needed)] as any[];
+  } else {
+    displayPopularProducts = displayPopularProducts.slice(0, 10);
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       
@@ -133,12 +221,45 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Shop by Categories Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight">
+              Shop <span className="font-extrabold text-[#1A1A2E]">by Categories</span>
+            </h2>
+            <Link href="/shop" className="px-6 py-2 border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors">
+              View All
+            </Link>
+          </div>
+          <div className="flex overflow-x-auto gap-8 pb-8 pt-4 scrollbar-hide snap-x">
+            {dbCategories?.map((cat) => {
+              const imgUrl = categoryImages[cat.slug] || 'https://images.unsplash.com/photo-1526406915894-7bcd65f60845?w=300&q=80';
+              return (
+                <Link key={cat.id} href={`/shop?category=${cat.slug}`} className="flex flex-col items-center gap-4 group shrink-0 snap-start">
+                  <div className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-[#EBE5F7] flex items-center justify-center p-2 mx-auto group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-2">
+                    <img 
+                      src={imgUrl} 
+                      alt={cat.name} 
+                      className="w-full h-full object-cover rounded-full" 
+                    />
+                  </div>
+                  <span className="text-sm md:text-base font-semibold text-center text-gray-800 group-hover:text-primary transition-colors">
+                    {cat.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* New Arrivals Section */}
       <section className="py-12">
         <div className="container mx-auto px-4 md:px-8">
           <h2 className="text-2xl font-bold tracking-tight mb-8">New Arrivals</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {MOCK_PRODUCTS.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {displayNewArrivals.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -162,7 +283,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors pointer-events-none" />
               <div className="relative z-10 p-8 text-white flex flex-col items-center">
                 <h3 className="text-3xl md:text-5xl font-bold mb-3 tracking-tight">Apple Products</h3>
-                <Link href="/shop" className="text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
+                <Link href="/collections/apple-products" className="text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
                   Explore <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -181,7 +302,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-90" />
                 <div className="relative z-10 p-8 text-white text-left">
                   <h3 className="text-2xl md:text-4xl font-bold mb-2 tracking-tight">Gaming Consoles</h3>
-                  <Link href="/shop" className="text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
+                  <Link href="/shop?category=gaming-consoles" className="text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
                     Explore <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
                   </Link>
                 </div>
@@ -200,7 +321,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors pointer-events-none" />
                   <div className="relative z-10 p-4 text-white flex flex-col items-center">
                     <h3 className="text-xl md:text-3xl font-bold mb-2 tracking-tight">Accessories</h3>
-                    <Link href="/shop" className="text-xs md:text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
+                    <Link href="/shop?category=accessories" className="text-xs md:text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
                       Explore <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
                     </Link>
                   </div>
@@ -217,7 +338,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors pointer-events-none" />
                   <div className="relative z-10 p-4 text-white flex flex-col items-center">
                     <h3 className="text-xl md:text-3xl font-bold mb-2 tracking-tight">Headphones</h3>
-                    <Link href="/shop" className="text-xs md:text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
+                    <Link href="/collections/headphones" className="text-xs md:text-sm font-semibold hover:underline inline-flex items-center gap-1 group/link text-white/90">
                       Explore <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
                     </Link>
                   </div>
@@ -232,8 +353,8 @@ export default function Home() {
       <section className="py-12">
         <div className="container mx-auto px-4 md:px-8">
           <h2 className="text-2xl font-bold tracking-tight mb-8">Popular Products</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {MOCK_POPULAR.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {displayPopularProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -400,11 +521,11 @@ export default function Home() {
             </div>
             {/* Sony */}
             <div className="bg-white rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-gray-100 flex items-center justify-center p-4 flex-shrink-0 w-32 md:w-44 h-24 snap-center hover:scale-105 transition-transform cursor-pointer">
-              <SiSony className="h-6 md:h-8 w-auto text-black" />
+              <SiSony className="w-20 md:w-28 h-auto text-black" />
             </div>
             {/* Samsung */}
             <div className="bg-white rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-gray-100 flex items-center justify-center p-4 flex-shrink-0 w-32 md:w-44 h-24 snap-center hover:scale-105 transition-transform cursor-pointer">
-              <SiSamsung className="h-6 md:h-7 w-auto text-black" />
+              <SiSamsung className="w-20 md:w-28 h-auto text-black" />
             </div>
             {/* Fitbit */}
             <div className="bg-white rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-gray-100 flex items-center justify-center p-4 flex-shrink-0 w-32 md:w-44 h-24 snap-center hover:scale-105 transition-transform cursor-pointer">
