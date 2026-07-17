@@ -89,7 +89,16 @@ export default async function AdminProductsPage(props: {
                         <img src={primaryImage} alt={product.name} className="h-full w-full object-cover" />
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {product.name}
+                        {product.is_popular && (
+                          <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-[10px] font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                            Popular
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{product.category?.name || "None"}</TableCell>
                     <TableCell>
                       {product.collection?.name ? (

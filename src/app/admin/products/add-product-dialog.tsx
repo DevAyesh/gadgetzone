@@ -47,7 +47,7 @@ export function AddProductDialog({ categories, collections }: { categories: any[
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="price">Price (USD)</label>
+              <label className="text-sm font-medium" htmlFor="price">Price (Rs.)</label>
               <input 
                 id="price" name="price" required type="number" step="0.01" min="0"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -56,7 +56,7 @@ export function AddProductDialog({ categories, collections }: { categories: any[
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="old_price">Old Price (USD) (Optional)</label>
+              <label className="text-sm font-medium" htmlFor="old_price">Old Price (Rs.) (Optional)</label>
               <input 
                 id="old_price" name="old_price" type="number" step="0.01" min="0"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -109,6 +109,19 @@ export function AddProductDialog({ categories, collections }: { categories: any[
                 <option value="HOT">HOT</option>
                 <option value="SALE">SALE</option>
               </select>
+            </div>
+            
+            <div className="space-y-2 flex flex-col justify-end pb-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  name="is_popular" 
+                  id="is_popular"
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                />
+                <span className="text-sm font-medium">Mark as Popular Product</span>
+              </label>
+              <p className="text-xs text-muted-foreground ml-6">This will show the product in the Popular Products section on the homepage.</p>
             </div>
           </div>
 

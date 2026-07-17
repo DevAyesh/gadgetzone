@@ -11,5 +11,5 @@ export function formatPrice(price: number) {
     currency: 'LKR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(price).replace('LKR', 'Rs. ');
+  }).format(price / 100).replace('LKR', 'Rs. ');
 }

@@ -16,23 +16,36 @@ const fallbackProducts = [
 export default async function ShopPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const searchParams = await props.searchParams;
   const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
+  const collection = typeof searchParams.collection === 'string' ? searchParams.collection : undefined;
+  const search = typeof searchParams.search === 'string' ? searchParams.search : undefined;
   
   const supabase = await createClient();
   let products: any[] | null = null;
 
   // Only try to fetch if Supabase URL is configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const collectionJoin = collection ? "collection:collections!inner(name, slug)" : "collection:collections(name, slug)";
+    
     let query = supabase
       .from("products")
       .select(`
         *,
         category:categories!inner(name, slug),
+        ${collectionJoin},
         images:product_images(image_url, is_primary)
       `)
       .order("created_at", { ascending: false });
 
     if (category) {
-      query = query.eq('categories.slug', category);
+      query = query.eq('category.slug', category);
+    }
+    
+    if (collection) {
+      query = query.eq('collection.slug', collection);
+    }
+
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
     }
 
     const { data } = await query;
@@ -44,9 +57,21 @@ export default async function ShopPage(props: { searchParams: Promise<{ [key: st
 
   if ((!products || products.length === 0) && category) {
     displayProducts = fallbackProducts.filter(p => p.category.slug === category);
+  } else if ((!products || products.length === 0) && search) {
+    displayProducts = fallbackProducts.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+  } else if ((!products || products.length === 0) && collection) {
+    // Basic fallback for collections just to show something
+    displayProducts = fallbackProducts;
   }
 
-
+  let pageTitle = "All Products";
+  if (category) {
+    pageTitle = category.charAt(0).toUpperCase() + category.slice(1);
+  } else if (collection) {
+    pageTitle = collection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  } else if (search) {
+    pageTitle = `Search Results for "${search}"`;
+  }
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 flex flex-col md:flex-row gap-8">
       
@@ -95,7 +120,7 @@ export default async function ShopPage(props: { searchParams: Promise<{ [key: st
       <div className="flex-1">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold">
-            {category ? category.charAt(0).toUpperCase() + category.slice(1) : "All Products"}
+            {pageTitle}
           </h1>
           <span className="text-muted-foreground">{displayProducts.length} Products</span>
         </div>

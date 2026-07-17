@@ -56,7 +56,7 @@ export default async function EditProductPage(props: { params: Promise<{ id: str
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="price">Price (USD)</label>
+                <label className="text-sm font-medium" htmlFor="price">Price (Rs.)</label>
                 <input 
                   id="price" name="price" required type="number" step="0.01" min="0"
                   defaultValue={product.price / 100}
@@ -113,6 +113,20 @@ export default async function EditProductPage(props: { params: Promise<{ id: str
                   <option value="HOT">HOT</option>
                   <option value="SALE">SALE</option>
                 </select>
+              </div>
+            
+              <div className="space-y-2 flex flex-col justify-end pb-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    name="is_popular" 
+                    id="is_popular"
+                    defaultChecked={product.is_popular}
+                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  />
+                  <span className="text-sm font-medium">Mark as Popular Product</span>
+                </label>
+                <p className="text-xs text-muted-foreground ml-6">This will show the product in the Popular Products section on the homepage.</p>
               </div>
             </div>
 
