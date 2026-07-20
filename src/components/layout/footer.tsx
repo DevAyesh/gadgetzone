@@ -36,9 +36,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-lg mb-4">Support</h4>
             <ul className="space-y-3 text-sm text-gray-300">
-              <li className="leading-relaxed">111 Bijoy sarani, Dhaka,<br/>DH 1515, Bangladesh.</li>
+              <li className="leading-relaxed">No. 45, Galle Road, Colombo 03,<br/>Western Province, Sri Lanka.</li>
               <li>gadgetmart@gmail.com</li>
-              <li>+88015-88888-9999</li>
+              <li>+94 77 123 4567</li>
             </ul>
           </div>
 
