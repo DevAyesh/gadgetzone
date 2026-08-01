@@ -18,6 +18,7 @@ export async function addProduct(formData: FormData) {
   const badge = formData.get("badge") as string;
   const description = formData.get("description") as string;
   const image_url = formData.get("image_url") as string;
+  const brand = formData.get("brand") as string;
   const is_popular = formData.get("is_popular") === "on";
 
   const { data: insertedProduct, error } = await supabase.from("products").insert({
@@ -30,6 +31,7 @@ export async function addProduct(formData: FormData) {
     stock,
     badge: badge === "NONE" ? "" : badge,
     description,
+    brand,
     is_active: true,
     is_popular,
   }).select("id").single();
@@ -82,6 +84,7 @@ export async function updateProduct(formData: FormData) {
   const badge = formData.get("badge") as string;
   const description = formData.get("description") as string;
   const image_url = formData.get("image_url") as string;
+  const brand = formData.get("brand") as string;
   const is_popular = formData.get("is_popular") === "on";
 
   const { error } = await supabase.from("products").update({
@@ -93,6 +96,7 @@ export async function updateProduct(formData: FormData) {
     stock,
     badge: badge === "NONE" ? "" : badge,
     description,
+    brand,
     is_popular,
   }).eq("id", id);
 

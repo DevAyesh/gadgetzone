@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { cn, formatPrice } from "@/lib/utils";
+import { ShopSidebar } from "@/components/shop-sidebar";
 
 // Dummy fallback in case Supabase env variables are not set yet
 const fallbackProducts = [
@@ -18,9 +19,16 @@ export default async function ShopPage(props: { searchParams: Promise<{ [key: st
   const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
   const collection = typeof searchParams.collection === 'string' ? searchParams.collection : undefined;
   const search = typeof searchParams.search === 'string' ? searchParams.search : undefined;
+  const brandsParam = typeof searchParams.brands === 'string' ? searchParams.brands : undefined;
+  const minPrice = typeof searchParams.minPrice === 'string' ? parseInt(searchParams.minPrice, 10) : undefined;
+  const maxPrice = typeof searchParams.maxPrice === 'string' ? parseInt(searchParams.maxPrice, 10) : undefined;
+  const inStock = searchParams.inStock === 'true';
+  const selectedBrands = brandsParam ? brandsParam.split(',').filter(Boolean) : [];
   
   const supabase = await createClient();
   let products: any[] | null = null;
+  let allCategories: any[] = [];
+  let availableBrands: string[] = [];
 
   // Only try to fetch if Supabase URL is configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -48,8 +56,35 @@ export default async function ShopPage(props: { searchParams: Promise<{ [key: st
       query = query.ilike('name', `%${search}%`);
     }
 
+    if (selectedBrands.length > 0) {
+      query = query.in('brand', selectedBrands);
+    }
+    
+    if (minPrice !== undefined) {
+      query = query.gte('price', minPrice * 100);
+    }
+    
+    if (maxPrice !== undefined) {
+      query = query.lte('price', maxPrice * 100);
+    }
+    
+    if (inStock) {
+      query = query.gt('stock', 0);
+    }
+
     const { data } = await query;
     products = data;
+
+    // Fetch categories for the sidebar
+    const { data: cats } = await supabase.from('categories').select('name, slug').order('name');
+    allCategories = cats || [];
+
+    // Fetch distinct brands for the sidebar (simple approach by fetching all unique brands from products)
+    const { data: brandsData } = await supabase.from('products').select('brand').not('brand', 'is', null);
+    if (brandsData) {
+      availableBrands = Array.from(new Set(brandsData.map(b => b.brand))).filter(Boolean) as string[];
+      availableBrands.sort();
+    }
   }
 
   // Use fallback if no database connection or empty results
@@ -77,43 +112,11 @@ export default async function ShopPage(props: { searchParams: Promise<{ [key: st
       
       {/* Sidebar / Filters */}
       <aside className="w-full md:w-64 shrink-0">
-        <div className="sticky top-24 space-y-8">
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Categories</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>
-                <Link href="/shop" className={cn("hover:text-primary transition-colors", !category && "text-primary font-medium")}>
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=smartphones" className={cn("hover:text-primary transition-colors", category === 'smartphones' && "text-primary font-medium")}>
-                  Smartphones
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=laptops" className={cn("hover:text-primary transition-colors", category === 'laptops' && "text-primary font-medium")}>
-                  Laptops
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=audio" className={cn("hover:text-primary transition-colors", category === 'audio' && "text-primary font-medium")}>
-                  Audio
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=cameras" className={cn("hover:text-primary transition-colors", category === 'cameras' && "text-primary font-medium")}>
-                  Cameras
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=wearables" className={cn("hover:text-primary transition-colors", category === 'wearables' && "text-primary font-medium")}>
-                  Wearables
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <ShopSidebar 
+          categories={allCategories} 
+          currentCategory={category}
+          availableBrands={availableBrands}
+        />
       </aside>
 
       {/* Main Content */}

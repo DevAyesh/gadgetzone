@@ -67,6 +67,7 @@ export default async function AdminProductsPage(props: {
               <TableHead className="w-[80px]">Image</TableHead>
               <TableHead>Product Name</TableHead>
               <TableHead>Category</TableHead>
+              <TableHead>Brand</TableHead>
               <TableHead>Collection</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Stock</TableHead>
@@ -100,6 +101,7 @@ export default async function AdminProductsPage(props: {
                       </div>
                     </TableCell>
                     <TableCell>{product.category?.name || "None"}</TableCell>
+                    <TableCell>{product.brand || "None"}</TableCell>
                     <TableCell>
                       {product.collection?.name ? (
                         <Badge variant="outline">{product.collection.name}</Badge>

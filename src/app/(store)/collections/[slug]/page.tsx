@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { formatPrice } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import { ShopSidebar } from "@/components/shop-sidebar";
 
 // Fallback products for demo when Supabase isn't connected
 const fallbackProducts = [
@@ -12,13 +13,23 @@ const fallbackProducts = [
   { name: "Sony WH-1000XM5", price: 34999, old_price: 39999, badge: "SALE", slug: "sony-wh-1000xm5", category: { name: "Audio" }, images: [{ image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80", is_primary: true }] },
 ];
 
-export default async function CollectionPage(props: { params: Promise<{ slug: string }> }) {
+export default async function CollectionPage(props: { params: Promise<{ slug: string }>, searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await props.params;
   const slug = params.slug;
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  
+  const brandsParam = typeof searchParams.brands === 'string' ? searchParams.brands : undefined;
+  const minPrice = typeof searchParams.minPrice === 'string' ? parseInt(searchParams.minPrice, 10) : undefined;
+  const maxPrice = typeof searchParams.maxPrice === 'string' ? parseInt(searchParams.maxPrice, 10) : undefined;
+  const inStock = searchParams.inStock === 'true';
+  const selectedBrands = brandsParam ? brandsParam.split(',').filter(Boolean) : [];
+
   const supabase = await createClient();
   
   let collection = null;
   let products = null;
+  let allCategories: any[] = [];
+  let availableBrands: string[] = [];
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
     // 1. Fetch collection details
@@ -32,7 +43,7 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
       collection = collectionData;
 
       // 2. Fetch products in this collection
-      const { data: productsData } = await supabase
+      let query = supabase
         .from("products")
         .select(`
           *,
@@ -42,7 +53,35 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
         .eq("collection_id", collection.id)
         .order("created_at", { ascending: false });
 
+      if (selectedBrands.length > 0) {
+        query = query.in('brand', selectedBrands);
+      }
+      
+      if (minPrice !== undefined) {
+        query = query.gte('price', minPrice * 100);
+      }
+      
+      if (maxPrice !== undefined) {
+        query = query.lte('price', maxPrice * 100);
+      }
+      
+      if (inStock) {
+        query = query.gt('stock', 0);
+      }
+
+      const { data: productsData } = await query;
       products = productsData;
+      
+      // Fetch categories for the sidebar
+      const { data: cats } = await supabase.from('categories').select('name, slug').order('name');
+      allCategories = cats || [];
+
+      // Fetch distinct brands for the sidebar
+      const { data: brandsData } = await supabase.from('products').select('brand').not('brand', 'is', null);
+      if (brandsData) {
+        availableBrands = Array.from(new Set(brandsData.map(b => b.brand))).filter(Boolean) as string[];
+        availableBrands.sort();
+      }
     }
   }
 
@@ -53,22 +92,33 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
   const pageTitle = collection?.name || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
   return (
-    <div className="container mx-auto px-4 md:px-8 py-16">
+    <div className="container mx-auto px-4 md:px-8 py-12 flex flex-col md:flex-row gap-8">
       
-      {/* Header Section */}
-      <div className="max-w-3xl mb-12 text-center mx-auto">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">{pageTitle} Collection</h1>
-        <p className="text-lg text-muted-foreground">
-          Explore our exclusive range of {pageTitle} products. Handpicked for the best experience.
-        </p>
-      </div>
+      {/* Sidebar / Filters */}
+      <aside className="w-full md:w-64 shrink-0">
+        <ShopSidebar 
+          categories={allCategories} 
+          currentCategory={undefined}
+          availableBrands={availableBrands}
+        />
+      </aside>
 
-      <div className="flex justify-between items-center mb-8 border-b border-border/50 pb-4">
-        <h2 className="text-2xl font-bold">Products</h2>
-        <span className="text-muted-foreground bg-muted px-3 py-1 rounded-full text-sm font-medium">
-          {displayProducts.length} Items
-        </span>
-      </div>
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* Header Section */}
+        <div className="max-w-3xl mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">{pageTitle} Collection</h1>
+          <p className="text-lg text-muted-foreground">
+            Explore our exclusive range of {pageTitle} products. Handpicked for the best experience.
+          </p>
+        </div>
+
+        <div className="flex justify-between items-center mb-8 border-b border-border/50 pb-4">
+          <h2 className="text-2xl font-bold">Products</h2>
+          <span className="text-muted-foreground bg-muted px-3 py-1 rounded-full text-sm font-medium">
+            {displayProducts.length} Items
+          </span>
+        </div>
 
       {displayProducts.length === 0 ? (
         <div className="text-center py-20 bg-muted/30 rounded-2xl border border-border/50">
