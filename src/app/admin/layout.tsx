@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LayoutDashboard, ShoppingBag, Users, Settings, Tags, ShoppingCart, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export const metadata: Metadata = {
   title: "GadgetZone Admin",
   description: "Admin panel for GadgetZone",
 };
+
+// Server Action — passed as a prop to the AdminSidebar Client Component.
+// This is the correct Next.js App Router pattern for cross-boundary server actions.
+async function logoutAction() {
+  "use server";
+  const { logout } = await import("@/app/(store)/(auth)/actions");
+  await logout();
+}
 
 export default async function AdminLayout({
   children,
@@ -16,7 +23,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login?next=/admin");
@@ -24,7 +33,7 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, first_name, last_name")
     .eq("id", user.id)
     .single();
 
@@ -32,72 +41,32 @@ export default async function AdminLayout({
     redirect("/?error=Unauthorized Access");
   }
 
+  // Derive display name for the sidebar avatar
+  const userInitial =
+    profile.first_name?.charAt(0)?.toUpperCase() ||
+    user.email?.charAt(0)?.toUpperCase() ||
+    "A";
+
   return (
     <div className="flex min-h-screen bg-background">
-      
-      {/* Admin Sidebar */}
-      <aside className="w-64 border-r border-border/50 glass hidden md:flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-border/50">
-          <Link href="/admin" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-            GadgetZone Admin
-          </Link>
-        </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            Dashboard
-          </Link>
-          <Link href="/admin/products" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <ShoppingBag className="h-5 w-5 text-primary" />
-            Products
-          </Link>
-          <Link href="/admin/categories" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <Tags className="h-5 w-5 text-primary" />
-            Categories
-          </Link>
-          <Link href="/admin/collections" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            Collections
-          </Link>
-          <Link href="/admin/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <ShoppingCart className="h-5 w-5 text-primary" />
-            Orders
-          </Link>
-          <Link href="/admin/customers" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <Users className="h-5 w-5 text-primary" />
-            Customers
-          </Link>
-          <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">
-            <Settings className="h-5 w-5 text-primary" />
-            Settings
-          </Link>
-        </nav>
-        <div className="p-4 border-t border-border/50 space-y-4">
-          <form action={async () => {
-            "use server";
-            const { logout } = await import("@/app/(store)/(auth)/actions");
-            await logout();
-          }}>
-            <button type="submit" className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg hover:bg-destructive/10 text-destructive text-sm font-medium transition-colors">
-              <LogOut className="h-5 w-5" />
-              Log out
-            </button>
-          </form>
-          <div className="text-xs text-muted-foreground px-3">GadgetZone v2.0 - 2026</div>
-        </div>
-      </aside>
+      {/* Collapsible Grouped Sidebar (Client Component) */}
+      <AdminSidebar
+        logoutAction={logoutAction}
+        userInitial={userInitial}
+        userEmail={user.email}
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Header */}
-        <header className="h-16 border-b border-border/50 glass sticky top-0 z-10 flex items-center justify-between px-6">
-          <div className="font-semibold text-muted-foreground">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Sticky Top Header */}
+        <header className="h-14 border-b border-border/50 glass sticky top-0 z-10 flex items-center justify-between px-6 flex-shrink-0">
+          <div className="text-sm font-medium text-muted-foreground">
             Admin Portal
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
-            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-sm text-primary">
-              A
+            <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center font-bold text-sm text-primary">
+              {userInitial}
             </div>
           </div>
         </header>
@@ -107,7 +76,6 @@ export default async function AdminLayout({
           {children}
         </main>
       </div>
-
     </div>
   );
 }
