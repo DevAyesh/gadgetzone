@@ -183,6 +183,7 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
