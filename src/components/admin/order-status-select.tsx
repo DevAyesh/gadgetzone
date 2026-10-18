@@ -39,7 +39,7 @@ export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectP
         // Revert to currentStatus on failure (since UI is controlled by state temporarily)
         e.target.value = status;
       }
-    } catch (error: any) {
+    } catch {
       toast.error("An unexpected error occurred");
       e.target.value = status;
     } finally {

@@ -19,7 +19,7 @@ export function OrderStatusUpdate({ orderId, currentStatus }: { orderId: string,
       } else {
         toast.error("Failed to update status", { description: result.error });
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred");
     } finally {
       setIsPending(false);
