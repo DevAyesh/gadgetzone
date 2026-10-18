@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminHeader } from "@/components/admin/admin-header";
 
 export const metadata: Metadata = {
   title: "GadgetZone Admin",
   description: "Admin panel for GadgetZone",
 };
 
-// Server Action — passed as a prop to the AdminSidebar Client Component.
-// This is the correct Next.js App Router pattern for cross-boundary server actions.
+// Server Action passed as prop to AdminSidebar & AdminHeader
 async function logoutAction() {
   "use server";
   const { logout } = await import("@/app/(store)/(auth)/actions");
@@ -41,7 +41,20 @@ export default async function AdminLayout({
     redirect("/?error=Unauthorized Access");
   }
 
-  // Derive display name for the sidebar avatar
+  // Fetch low stock count for header alert
+  let lowStockCount = 0;
+  try {
+    const adminSupabase = await createAdminClient();
+    const { count } = await adminSupabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .lte("stock", 10);
+    lowStockCount = count ?? 0;
+  } catch (e) {
+    console.error("Failed to fetch low stock count for admin header:", e);
+  }
+
+  // Derive display name for avatar
   const userInitial =
     profile.first_name?.charAt(0)?.toUpperCase() ||
     user.email?.charAt(0)?.toUpperCase() ||
@@ -49,30 +62,26 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Collapsible Grouped Sidebar (Client Component) */}
+      {/* Collapsible Grouped Sidebar for desktop */}
       <AdminSidebar
         logoutAction={logoutAction}
         userInitial={userInitial}
         userEmail={user.email}
       />
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Sticky Top Header */}
-        <header className="h-14 border-b border-border/50 glass sticky top-0 z-10 flex items-center justify-between px-6 flex-shrink-0">
-          <div className="text-sm font-medium text-muted-foreground">
-            Admin Portal
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center font-bold text-sm text-primary">
-              {userInitial}
-            </div>
-          </div>
-        </header>
+        {/* Sticky Top Header with mobile sheet navigation */}
+        <AdminHeader
+          userInitial={userInitial}
+          userEmail={user.email}
+          userRole={profile.role}
+          lowStockCount={lowStockCount}
+          logoutAction={logoutAction}
+        />
 
         {/* Page Content */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
           {children}
         </main>
       </div>
