@@ -12,7 +12,18 @@ import {
 } from "@/components/ui/dialog";
 import { addProduct } from "./actions";
 
-export function AddProductDialog({ categories, collections }: { categories: any[], collections: any[] }) {
+interface CategoryOrCollectionItem {
+  id: string;
+  name: string;
+}
+
+export function AddProductDialog({
+  categories,
+  collections,
+}: {
+  categories: CategoryOrCollectionItem[];
+  collections: CategoryOrCollectionItem[];
+}) {
   const [open, setOpen] = useState(false);
 
   return (
