@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 interface ConfirmDialogProps {
   /** The trigger element (button/link that opens the dialog). */
-  trigger: React.ReactNode;
+  trigger: React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>;
   title: string;
   description: string;
   confirmLabel?: string;
@@ -25,7 +25,7 @@ interface ConfirmDialogProps {
    * this is a valid Next.js App Router pattern.
    */
   onConfirm: () => Promise<{ success: boolean; error?: string } | void>;
-  variant?: "destructive" | "warning";
+  variant?: "destructive" | "warning" | "default";
   successMessage?: string;
 }
 
@@ -51,24 +51,22 @@ export function ConfirmDialog({
           toast.success(successMessage);
           setOpen(false);
         }
-      } catch (err: any) {
-        toast.error("An unexpected error occurred", { description: err?.message });
+      } catch (err: unknown) {
+        const description = err instanceof Error ? err.message : undefined;
+        toast.error("An unexpected error occurred", { description });
       }
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* Trigger — rendered inline so callers don't need Dialog boilerplate */}
-      <span
-        onClick={() => setOpen(true)}
-        className="contents"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && setOpen(true)}
-      >
-        {trigger}
-      </span>
+      {React.cloneElement(trigger, {
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        },
+      })}
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -77,14 +75,18 @@ export function ConfirmDialog({
               className={
                 variant === "destructive"
                   ? "h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0"
-                  : "h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center flex-shrink-0"
+                  : variant === "warning"
+                  ? "h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center flex-shrink-0"
+                  : "h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"
               }
             >
               <AlertTriangle
                 className={
                   variant === "destructive"
                     ? "h-5 w-5 text-red-500"
-                    : "h-5 w-5 text-yellow-500"
+                    : variant === "warning"
+                    ? "h-5 w-5 text-yellow-500"
+                    : "h-5 w-5 text-primary"
                 }
               />
             </div>

@@ -17,9 +17,37 @@ import {
   AlertTriangle,
   PackageX,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import Image from "next/image";
+
+interface DashboardProductImage {
+  image_url: string;
+  is_primary?: boolean;
+}
+
+interface DashboardProduct {
+  id: string;
+  name: string;
+  product_images?: DashboardProductImage[];
+}
+
+interface DashboardCustomer {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  created_at: string;
+}
+
+interface DashboardOrder {
+  id: string;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  order_number: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
+}
 
 // ─── Data fetching ─────────────────────────────────────────────────────────────
 //
@@ -119,13 +147,13 @@ async function getDashboardData() {
   const productSalesMap = new Map<string, { name: string; quantity: number; imageUrl: string }>();
   for (const item of (orderItems || [])) {
     const pid  = item.product_id;
-    const prod = item.products as any;
+    const prod = item.products as unknown as DashboardProduct | null;
     const existing = productSalesMap.get(pid);
     if (existing) {
       existing.quantity += item.quantity;
     } else {
       const imageUrl =
-        prod?.product_images?.find((img: any) => img.is_primary)?.image_url ||
+        prod?.product_images?.find((img) => img.is_primary)?.image_url ||
         prod?.product_images?.[0]?.image_url || "";
       productSalesMap.set(pid, { name: prod?.name || "Unknown", quantity: item.quantity, imageUrl });
     }
@@ -209,12 +237,37 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-[1400px]">
 
-      {/* ── Page Title ──────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Welcome back — here's what's happening with your store.
-        </p>
+      {/* ── Page Title & Quick Actions ─────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Store Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Welcome back — real-time overview of catalog, orders, and store health.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
+          >
+            <Package className="h-3.5 w-3.5" />
+            Add Product
+          </Link>
+          <Link
+            href="/admin/inventory"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border/50"
+          >
+            <TrendingUp className="h-3.5 w-3.5" />
+            Inventory Hub
+          </Link>
+          <Link
+            href="/admin/marketing/coupons"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border/50"
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            Coupons
+          </Link>
+        </div>
       </div>
 
       {/* ── Primary KPI Row ─────────────────────────────────────────────────── */}
@@ -281,7 +334,7 @@ export default async function AdminDashboardPage() {
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
                 <span className="text-muted-foreground">Low Stock</span>
               </div>
-              <Link href="/admin/inventory" className="text-sm font-bold text-yellow-500 hover:underline">
+              <Link href="/admin/inventory?filter=low_stock" className="text-sm font-bold text-yellow-500 hover:underline">
                 {lowStockCount}
               </Link>
             </div>
@@ -290,7 +343,7 @@ export default async function AdminDashboardPage() {
                 <PackageX className="h-4 w-4 text-red-500" />
                 <span className="text-muted-foreground">Out of Stock</span>
               </div>
-              <Link href="/admin/inventory" className="text-sm font-bold text-red-500 hover:underline">
+              <Link href="/admin/inventory?filter=out_of_stock" className="text-sm font-bold text-red-500 hover:underline">
                 {outOfStockCount}
               </Link>
             </div>
@@ -418,13 +471,14 @@ export default async function AdminDashboardPage() {
               <p className="text-sm text-muted-foreground text-center py-4">No customers yet</p>
             ) : (
               <div className="space-y-3">
-                {recentCustomers.map((customer: any) => {
+                {recentCustomers.map((customer) => {
+                  const cust = customer as DashboardCustomer;
                   const name =
-                    `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||
+                    `${cust.first_name || ""} ${cust.last_name || ""}`.trim() ||
                     "Anonymous";
                   const initial = name.charAt(0).toUpperCase();
                   return (
-                    <div key={customer.id} className="flex items-center gap-3">
+                    <div key={cust.id} className="flex items-center gap-3">
                       <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
                         {initial}
                       </div>
@@ -469,8 +523,9 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
-                {recentOrders.map((order: any) => {
-                  const customer = order.profiles;
+                {recentOrders.map((order) => {
+                  const ord = order as unknown as DashboardOrder;
+                  const customer = ord.profiles;
                   const customerName =
                     customer
                       ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() || "Guest"

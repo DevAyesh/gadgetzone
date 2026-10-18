@@ -17,11 +17,21 @@ export interface RevenueChartDataPoint {
   orders: number;
 }
 
-interface RevenueChartProps {
+export interface RevenueChartProps {
   data: RevenueChartDataPoint[];
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface RevenueTooltipPayload {
+  value?: number;
+}
+
+interface RevenueTooltipProps {
+  active?: boolean;
+  payload?: RevenueTooltipPayload[];
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: RevenueTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-card border border-border/50 rounded-lg p-3 shadow-xl text-xs space-y-1.5">

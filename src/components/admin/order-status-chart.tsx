@@ -1,6 +1,7 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import type { PieLabelRenderProps } from "recharts";
 
 export interface OrderStatusDataPoint {
   name: string;
@@ -15,18 +16,32 @@ interface OrderStatusChartProps {
 
 const RADIAN = Math.PI / 180;
 
+interface ChartTooltipPayload {
+  name: string;
+  value: number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: Array<ChartTooltipPayload>;
+}
+
 function renderCustomizedLabel({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-}: any) {
-  if (percent < 0.05) return null; // hide very small slices
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  cx = 0,
+  cy = 0,
+  midAngle = 0,
+  innerRadius = 0,
+  outerRadius = 0,
+  percent = 0,
+}: PieLabelRenderProps) {
+  const p = Number(percent) || 0;
+  if (p < 0.05) return null; // hide very small slices
+  const rInner = Number(innerRadius) || 0;
+  const rOuter = Number(outerRadius) || 0;
+  const radius = rInner + (rOuter - rInner) * 0.5;
+  const angle = Number(midAngle) || 0;
+  const x = Number(cx) + radius * Math.cos(-angle * RADIAN);
+  const y = Number(cy) + radius * Math.sin(-angle * RADIAN);
 
   return (
     <text
@@ -43,7 +58,7 @@ function renderCustomizedLabel({
   );
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     const { name, value } = payload[0];
     return (
