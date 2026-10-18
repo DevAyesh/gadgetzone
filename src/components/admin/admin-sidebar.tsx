@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -16,34 +16,28 @@ import {
   Layers,
   Award,
   Warehouse,
-  Truck,
-  FileText,
-  BarChart3,
   History,
-  Bell,
-  Activity,
   TrendingUp,
-  ImageIcon,
   Star,
   Ticket,
   ChevronRight,
   Store,
+  BarChart3,
+  ExternalLink,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface NavItem {
+export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Future: badge count for unread notifications, low-stock alerts, etc. */
   badge?: number;
-  /** Marks the route as not yet built — renders as coming-soon style */
   soon?: boolean;
 }
 
-interface NavGroup {
+export interface NavGroup {
   title: string;
   icon: LucideIcon;
   items: NavItem[];
@@ -51,14 +45,14 @@ interface NavGroup {
 
 // ─── Navigation structure ────────────────────────────────────────────────────
 
-const NAV_GROUPS: NavGroup[] = [
+export const NAV_GROUPS: NavGroup[] = [
   {
     title: "Catalog",
     icon: Package,
     items: [
       { href: "/admin/products",    label: "Products",    icon: ShoppingBag },
       { href: "/admin/categories",  label: "Categories",  icon: Tags },
-      { href: "/admin/brands",      label: "Brands",      icon: Award,      soon: true },
+      { href: "/admin/brands",      label: "Brands",      icon: Award },
       { href: "/admin/collections", label: "Collections", icon: Layers },
     ],
   },
@@ -66,62 +60,43 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Inventory",
     icon: Warehouse,
     items: [
-      { href: "/admin/inventory",                    label: "Inventory",       icon: BarChart3, soon: true },
-      { href: "/admin/inventory/stock-history",      label: "Stock History",   icon: History,   soon: true },
-      { href: "/admin/inventory/suppliers",          label: "Suppliers",       icon: Truck,     soon: true },
-      { href: "/admin/inventory/purchase-orders",    label: "Purchase Orders", icon: FileText,  soon: true },
+      { href: "/admin/inventory",               label: "Inventory Stock", icon: Warehouse },
+      { href: "/admin/inventory/stock-history", label: "Stock History",   icon: History },
     ],
   },
   {
-    title: "Sales",
+    title: "Sales & Marketing",
     icon: ShoppingCart,
     items: [
-      { href: "/admin/orders",             label: "Orders",    icon: ShoppingCart },
-      { href: "/admin/customers",          label: "Customers", icon: Users },
-      { href: "/admin/marketing/coupons",  label: "Coupons",   icon: Ticket, soon: true },
+      { href: "/admin/orders",            label: "Orders",    icon: ShoppingCart },
+      { href: "/admin/customers",         label: "Customers", icon: Users },
+      { href: "/admin/marketing/coupons", label: "Coupons",   icon: Ticket },
     ],
   },
   {
-    title: "Content",
-    icon: ImageIcon,
+    title: "Customer Experience",
+    icon: Star,
     items: [
-      { href: "/admin/content/banners", label: "Banners", icon: ImageIcon, soon: true },
-      { href: "/admin/content/reviews", label: "Reviews", icon: Star,      soon: true },
+      { href: "/admin/content/reviews", label: "Reviews", icon: Star },
     ],
   },
   {
-    title: "Reports",
+    title: "Analytics & Reports",
     icon: TrendingUp,
     items: [
-      { href: "/admin/reports/sales",      label: "Sales Reports",      icon: TrendingUp, soon: true },
-      { href: "/admin/reports/inventory",  label: "Inventory Reports",  icon: BarChart3,  soon: true },
-      { href: "/admin/reports/customers",  label: "Customer Reports",   icon: Users,      soon: true },
+      { href: "/admin/reports/sales",     label: "Sales Analytics",     icon: TrendingUp },
+      { href: "/admin/reports/inventory", label: "Inventory Valuation", icon: BarChart3 },
+      { href: "/admin/reports/customers", label: "Customer Insights",   icon: Users },
     ],
   },
   {
     title: "System",
     icon: Settings,
     items: [
-      { href: "/admin/system/notifications", label: "Notifications", icon: Bell,     soon: true },
-      { href: "/admin/system/audit-logs",    label: "Audit Logs",    icon: Activity, soon: true },
-      { href: "/admin/settings",             label: "Settings",       icon: Settings },
+      { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
   },
 ];
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function getDefaultOpenGroups(pathname: string): Set<string> {
-  const open = new Set<string>();
-  for (const group of NAV_GROUPS) {
-    if (group.items.some((item) => pathname.startsWith(item.href))) {
-      open.add(group.title);
-    }
-  }
-  // Always open at least the first group if nothing matches
-  if (open.size === 0) open.add("Catalog");
-  return open;
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -130,30 +105,35 @@ function NavGroupSection({
   isOpen,
   onToggle,
   pathname,
+  onItemClick,
 }: {
   group: NavGroup;
   isOpen: boolean;
   onToggle: () => void;
   pathname: string;
+  onItemClick?: () => void;
 }) {
   const GroupIcon = group.icon;
-  const hasActiveItem = group.items.some((item) => pathname.startsWith(item.href));
+  const hasActiveItem = group.items.some((item) =>
+    pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+  );
 
   return (
     <div className="space-y-0.5">
       {/* Group Header */}
       <button
         onClick={onToggle}
+        type="button"
         className={cn(
           "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors",
           hasActiveItem
-            ? "text-foreground"
+            ? "text-foreground font-bold"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
         <div className="flex items-center gap-2">
           <GroupIcon className="h-3.5 w-3.5" />
-          {group.title}
+          <span>{group.title}</span>
         </div>
         <ChevronRight
           className={cn(
@@ -168,22 +148,30 @@ function NavGroupSection({
         <div className="ml-1 space-y-0.5 pl-3 border-l border-border/40">
           {group.items.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/admin" && pathname.startsWith(item.href));
 
             return (
               <Link
                 key={item.href}
                 href={item.soon ? "#" : item.href}
+                onClick={(e) => {
+                  if (item.soon) {
+                    e.preventDefault();
+                  } else if (onItemClick) {
+                    onItemClick();
+                  }
+                }}
                 className={cn(
                   "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors group",
                   isActive
-                    ? "bg-primary text-primary-foreground font-medium"
+                    ? "bg-primary text-primary-foreground font-medium shadow-sm"
                     : item.soon
                     ? "text-muted-foreground/50 cursor-not-allowed"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
                 tabIndex={item.soon ? -1 : 0}
-                onClick={item.soon ? (e) => e.preventDefault() : undefined}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className="h-4 w-4 flex-shrink-0" />
@@ -211,59 +199,57 @@ function NavGroupSection({
   );
 }
 
-// ─── Main Sidebar ─────────────────────────────────────────────────────────────
+// ─── Reusable Sidebar Content ────────────────────────────────────────────────
 
-interface AdminSidebarProps {
+interface SidebarContentProps {
   logoutAction: () => Promise<void>;
   userInitial: string;
   userEmail?: string;
+  onItemClick?: () => void;
 }
 
-export function AdminSidebar({
+export function SidebarContent({
   logoutAction,
   userInitial,
   userEmail,
-}: AdminSidebarProps) {
+  onItemClick,
+}: SidebarContentProps) {
   const pathname = usePathname();
-  const [openGroups, setOpenGroups] = useState<Set<string>>(() =>
-    getDefaultOpenGroups(pathname)
-  );
+  const [toggledGroups, setToggledGroups] = useState<Record<string, boolean>>({});
 
-  // Re-sync open groups when the route changes (e.g. navigating to a new section)
-  useEffect(() => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      for (const group of NAV_GROUPS) {
-        if (group.items.some((item) => pathname.startsWith(item.href))) {
-          next.add(group.title);
-        }
-      }
-      return next;
-    });
-  }, [pathname]);
+  const isGroupOpen = (title: string) => {
+    if (toggledGroups[title] !== undefined) {
+      return toggledGroups[title];
+    }
+    const group = NAV_GROUPS.find((g) => g.title === title);
+    if (!group) return false;
+    return (
+      group.items.some((item) => pathname.startsWith(item.href)) ||
+      title === "Catalog"
+    );
+  };
 
   const toggleGroup = (title: string) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(title)) {
-        next.delete(title);
-      } else {
-        next.add(title);
-      }
-      return next;
-    });
+    setToggledGroups((prev) => ({
+      ...prev,
+      [title]: !isGroupOpen(title),
+    }));
   };
 
   const isDashboard = pathname === "/admin";
 
   return (
-    <aside className="w-64 border-r border-border/50 glass hidden md:flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Brand */}
-      <div className="h-14 flex items-center px-5 border-b border-border/50 flex-shrink-0">
+      <div className="h-14 flex items-center justify-between px-5 border-b border-border/50 flex-shrink-0">
         <Link
           href="/admin"
-          className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 tracking-tight"
+          onClick={onItemClick}
+          className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 tracking-tight flex items-center gap-2"
         >
+          <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center text-primary-foreground text-xs font-black">
+            GZ
+          </div>
           GadgetZone Admin
         </Link>
       </div>
@@ -273,10 +259,11 @@ export function AdminSidebar({
         {/* Dashboard — standalone link */}
         <Link
           href="/admin"
+          onClick={onItemClick}
           className={cn(
             "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-2",
             isDashboard
-              ? "bg-primary text-primary-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
         >
@@ -293,9 +280,10 @@ export function AdminSidebar({
             <NavGroupSection
               key={group.title}
               group={group}
-              isOpen={openGroups.has(group.title)}
+              isOpen={isGroupOpen(group.title)}
               onToggle={() => toggleGroup(group.title)}
               pathname={pathname}
+              onItemClick={onItemClick}
             />
           ))}
         </div>
@@ -307,10 +295,13 @@ export function AdminSidebar({
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
-          <Store className="h-4 w-4" />
-          View Store
+          <div className="flex items-center gap-2.5">
+            <Store className="h-4 w-4" />
+            <span>View Store</span>
+          </div>
+          <ExternalLink className="h-3 w-3 opacity-60" />
         </Link>
 
         {/* Logout */}
@@ -333,10 +324,34 @@ export function AdminSidebar({
             {userEmail && (
               <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
             )}
-            <p className="text-[10px] text-muted-foreground/50">v2.0 · 2026</p>
+            <p className="text-[10px] text-muted-foreground/50">Admin Panel · 2026</p>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Desktop Sidebar ─────────────────────────────────────────────────────────
+
+export interface AdminSidebarProps {
+  logoutAction: () => Promise<void>;
+  userInitial: string;
+  userEmail?: string;
+}
+
+export function AdminSidebar({
+  logoutAction,
+  userInitial,
+  userEmail,
+}: AdminSidebarProps) {
+  return (
+    <aside className="w-64 border-r border-border/50 glass hidden md:flex flex-col shrink-0">
+      <SidebarContent
+        logoutAction={logoutAction}
+        userInitial={userInitial}
+        userEmail={userEmail}
+      />
     </aside>
   );
 }

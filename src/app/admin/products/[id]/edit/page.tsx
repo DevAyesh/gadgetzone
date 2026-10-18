@@ -1,13 +1,25 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { updateProduct } from "../../actions";
 import { notFound } from "next/navigation";
 
-export default async function EditProductPage(props: { params: Promise<{ id: string }> }) {
+interface ProductImageRow {
+  image_url: string;
+  is_primary?: boolean;
+}
+
+export default async function EditProductPage(props: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const params = await props.params;
-  const supabase = await createClient();
+  const searchParams = await props.searchParams;
+  const error = searchParams?.error;
+
+  const supabase = await createAdminClient();
   
   const { data: categories } = await supabase.from("categories").select("*").order("name");
   const { data: collections } = await supabase.from("collections").select("*").order("name");
@@ -17,7 +29,7 @@ export default async function EditProductPage(props: { params: Promise<{ id: str
     notFound();
   }
 
-  const primaryImage = product.product_images?.find((img: any) => img.is_primary)?.image_url 
+  const primaryImage = product.product_images?.find((img: ProductImageRow) => img.is_primary)?.image_url 
                         || product.product_images?.[0]?.image_url 
                         || "";
 
@@ -29,6 +41,13 @@ export default async function EditProductPage(props: { params: Promise<{ id: str
           Cancel
         </Link>
       </div>
+
+      {error && (
+        <div className="p-3.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span>{decodeURIComponent(error)}</span>
+        </div>
+      )}
 
       <Card className="glass-card border-border/50">
         <CardHeader>
